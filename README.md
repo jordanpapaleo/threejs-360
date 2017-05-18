@@ -9,5 +9,6 @@
 
 # Done
 
+- [x] globe movement
 - [x] apply an equirectangle mage to that geometry
 - [x] Create a sphere geometry to serve as our globe

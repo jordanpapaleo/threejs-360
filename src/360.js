@@ -104,6 +104,8 @@ function animate () {
 }
 
 function update () {
+  renderer.render(scene, camera)
+  return
   if (isUserInteracting === false) {
     lon += 0.1
   }
