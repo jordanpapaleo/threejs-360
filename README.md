@@ -6,7 +6,9 @@
 - [ ] add and remove hotspot meshes from
 - [ ] replace the image and the hotspots with new ones
 - [ ] sphere zooming
+- [ ] preload a camera rotation
 - [ ] events on meshes
+- [ ] `?` screen capture
 
 
 # Done

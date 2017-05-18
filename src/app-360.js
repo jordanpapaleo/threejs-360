@@ -36,9 +36,9 @@ function render (dT) {
   requestAnimationFrame(render)
   renderer.render(scene, camera)
 
-  if (!isUserInteracting) {
-    lon += 0.05
-  }
+  // if (!isUserInteracting) {
+  //   lon += 0.05
+  // }
 
   lat = Math.max(-85, Math.min(85, lat))
   phi = THREE.Math.degToRad(90 - lat)
@@ -60,8 +60,8 @@ let onPointerDownLat = 0
 window.addEventListener('mousedown', (ev) => {
   ev.preventDefault()
   isUserInteracting = true
-  onPointerDownPointerX = event.clientX
-  onPointerDownPointerY = event.clientY
+  onPointerDownPointerX = ev.clientX
+  onPointerDownPointerY = ev.clientY
   onPointerDownLon = lon
   onPointerDownLat = lat
 }, false)
