@@ -5,6 +5,8 @@
 - [ ] detect raycasting events with with a 'click'
 - [ ] add and remove hotspot meshes from
 - [ ] replace the image and the hotspots with new ones
+- [ ] sphere zooming
+- [ ] events on meshes
 
 
 # Done
