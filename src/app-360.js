@@ -4,6 +4,19 @@ const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
 camera.target = new THREE.Vector3(0, 0, 0)
 scene.add(camera)
 
+const planeGeometry = new THREE.PlaneGeometry(5, 5)
+const planeMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffff00,
+  side: THREE.DoubleSide
+})
+
+const plane = new THREE.Mesh(planeGeometry, planeMaterial)
+plane.position.z = 0
+plane.position.x = 50
+plane.position.y = 15
+plane.lookAt(camera.position)
+scene.add(plane)
+
 const globeGeometry = new THREE.SphereGeometry(500, 60, 40)
 globeGeometry.scale(-1, 1, 1)
 const globeMaterial = new THREE.MeshBasicMaterial({
