@@ -1,5 +1,6 @@
 const {innerWidth: width, innerHeight: height, THREE} = window
 const scene = new THREE.Scene()
+// scene.fog = new THREE.FogExp2(0xcccccc, 0.002)
 const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
 camera.target = new THREE.Vector3(0, 0, 0)
 scene.add(camera)
@@ -92,4 +93,10 @@ window.addEventListener('mousemove', (ev) => {
     lon = (onPointerDownPointerX - ev.clientX) * 0.1 + onPointerDownLon
     lat = (ev.clientY - onPointerDownPointerY) * 0.1 + onPointerDownLat
   }
+}, false)
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight
+  camera.updateProjectionMatrix()
+  renderer.setSize(window.innerWidth, window.innerHeight)
 }, false)
