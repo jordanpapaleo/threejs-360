@@ -1,6 +1,5 @@
 # TODO
 
-
 - [ ] detect raycasting events with a cursor like we did in aframe
 - [ ] detect raycasting events with with a 'click'
 - [ ] add and remove hotspot meshes from

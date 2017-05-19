@@ -3,6 +3,14 @@ const scene = new THREE.Scene()
 // scene.fog = new THREE.FogExp2(0xcccccc, 0.002)
 const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
 camera.target = new THREE.Vector3(0, 0, 0)
+const cursorGeometry = new THREE.RingGeometry(0.05, 0.075, 32)
+const cursorMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffff00,
+  side: THREE.DoubleSide
+})
+const cursor = new THREE.Mesh(cursorGeometry, cursorMaterial)
+cursor.position.z = -3
+camera.add(cursor)
 scene.add(camera)
 
 const planeGeometry = new THREE.PlaneGeometry(5, 5)
