@@ -27,7 +27,7 @@ const globe = new THREE.Mesh(globeGeometry, globeMaterial)
 globe.material.side = THREE.DoubleSide
 scene.add(globe)
 
-const renderer = new THREE.WebGLRenderer()
+const renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.setSize(width, height)
 document.body.appendChild(renderer.domElement)
 
