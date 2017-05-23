@@ -1,13 +1,11 @@
 # TODO
 
 - [ ] detect raycasting events with with a 'click'
-- [ ] replace the image and the hotspots with new ones
 - [ ] preload a camera rotation
-- [ ] `?` screen capture
-
 
 # Done
 
+- [x] screen capture
 - [x] sphere zooming
 - [x] remove hotspot meshes from
 - [x] add hotspot meshes from

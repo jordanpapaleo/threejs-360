@@ -110,6 +110,19 @@ var savedLongitude
 var savedLatitude
 var fov = camera.fov
 
+setTimeout(() => {
+  screenShot()
+}, 3000)
+
+function screenShot () {
+  var w = window.open('', '')
+  w.document.title = 'Screenshot'
+  var img = new Image()
+  renderer.render(scene, camera)
+  img.src = renderer.domElement.toDataURL()
+  w.document.body.appendChild(img)
+}
+
 function onDocumentMouseWheel (ev) {
   var minFov = 30
   var maxFov = 75
