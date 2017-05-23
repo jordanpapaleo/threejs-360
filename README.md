@@ -2,13 +2,13 @@
 
 - [ ] detect raycasting events with with a 'click'
 - [ ] replace the image and the hotspots with new ones
-- [ ] sphere zooming
 - [ ] preload a camera rotation
 - [ ] `?` screen capture
 
 
 # Done
 
+- [x] sphere zooming
 - [x] remove hotspot meshes from
 - [x] add hotspot meshes from
 - [x] detect raycasting events with a cursor like we did in aframe

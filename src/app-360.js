@@ -97,6 +97,9 @@ document.body.appendChild(renderer.domElement)
 document.addEventListener('mousedown', onDocumentMouseDown, false)
 document.addEventListener('mousemove', onDocumentMouseMove, false)
 document.addEventListener('mouseup', onDocumentMouseUp, false)
+window.addEventListener('resize', onResize, false)
+window.addEventListener('DOMMouseScroll', onDocumentMouseWheel, false)
+window.addEventListener('mousewheel', onDocumentMouseWheel, false)
 
 var manualControl = false
 var longitude = 0
@@ -105,6 +108,29 @@ var savedX
 var savedY
 var savedLongitude
 var savedLatitude
+var fov = camera.fov
+
+function onDocumentMouseWheel (ev) {
+  var minFov = 30
+  var maxFov = 75
+
+  fov -= ev.wheelDeltaY * 0.05
+
+  if (fov < minFov) {
+    fov = minFov
+  } else if (fov > maxFov) {
+    fov = maxFov
+  }
+
+  camera.fov = fov
+  camera.updateProjectionMatrix()
+}
+
+function onResize () {
+  camera.aspect = window.innerWidth / window.innerHeight
+  camera.updateProjectionMatrix()
+  renderer.setSize(window.innerWidth, window.innerHeight)
+}
 
 function onDocumentMouseDown (ev) {
   ev.preventDefault()
@@ -136,7 +162,6 @@ function panUpdate (camera) {
 
   const latRad = THREE.Math.degToRad(90 - latitude)
   const longRad = THREE.Math.degToRad(longitude)
-  console.log(latRad, longRad)
   const x = Math.sin(latRad) * Math.cos(longRad)
   const y = Math.cos(latRad)
   const z = Math.sin(latRad) * Math.sin(longRad)
@@ -154,9 +179,3 @@ function renderLoop (dT) {
 }
 
 renderLoop()
-
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight
-  camera.updateProjectionMatrix()
-  renderer.setSize(window.innerWidth, window.innerHeight)
-}, false)
