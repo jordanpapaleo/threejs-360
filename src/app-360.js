@@ -1,107 +1,159 @@
-const {innerWidth: width, innerHeight: height, THREE} = window
+const {innerWidth: width, innerHeight: height, THREE, Cursor} = window
 const scene = new THREE.Scene()
-// scene.fog = new THREE.FogExp2(0xcccccc, 0.002)
+scene.name = 'scene'
 const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000)
+camera.name = 'camera'
 camera.target = new THREE.Vector3(0, 0, 0)
-const cursorGeometry = new THREE.RingGeometry(0.05, 0.075, 32)
-const cursorMaterial = new THREE.MeshBasicMaterial({
-  color: 0xffff00,
-  side: THREE.DoubleSide
-})
-const cursor = new THREE.Mesh(cursorGeometry, cursorMaterial)
-cursor.position.z = -3
-camera.add(cursor)
 scene.add(camera)
 
-const planeGeometry = new THREE.PlaneGeometry(5, 5)
-const planeMaterial = new THREE.MeshBasicMaterial({
-  color: 0xffff00,
-  side: THREE.DoubleSide
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+directionalLight.name = 'directionalLight'
+directionalLight.position.set(1, 1, 1)
+camera.add(directionalLight)
+
+const ambientLight = new THREE.AmbientLight(0x444444)
+ambientLight.name = 'ambientLight'
+scene.add(ambientLight)
+
+const planeGeometry = new THREE.PlaneGeometry(3, 3)
+const planeMaterial = new THREE.MeshPhongMaterial({
+  color: 0xaaaaaa,
+  specular: 0xffffff,
+  shininess: 250,
+  side: THREE.DoubleSide,
+  vertexColors: THREE.VertexColors
 })
 
-const plane = new THREE.Mesh(planeGeometry, planeMaterial)
-plane.position.z = 0
-plane.position.x = 50
-plane.position.y = 15
-plane.lookAt(camera.position)
-scene.add(plane)
+const planes = [
+  new THREE.Mesh(planeGeometry, planeMaterial),
+  new THREE.Mesh(planeGeometry, planeMaterial),
+  new THREE.Mesh(planeGeometry, planeMaterial)
+]
 
-const globeGeometry = new THREE.SphereGeometry(500, 60, 40)
-globeGeometry.scale(-1, 1, 1)
-const globeMaterial = new THREE.MeshBasicMaterial({
-  map: new THREE.TextureLoader().load('src/textures/equirectangle.jpg')
+const cursor = new Cursor(camera)
+cursor.name = 'cursor'
+
+planes.forEach((plane, i) => {
+  plane.name = 'plane' + i
+  plane.position.set(i * 5, 0, -20)
+  plane.lookAt(camera.position)
+
+  plane.onFusing = function () {
+    console.warn('fusing')
+    if (this.material.emissive) {
+      this.material.emissive.setHex(0xff0000)
+    }
+  }
+
+  plane.onFused = function () {
+    console.warn('onfused')
+    this.material.emissive.setHex(0x00ff00)
+  }
+
+  plane.onFuseEnd = function () {
+    console.warn('onfuseend')
+    if (this.material.emissive) {
+      this.material.emissive.setHex(0xffff00)
+    }
+  }
+
+  cursor.addItem(plane)
+  scene.add(plane)
 })
-const globe = new THREE.Mesh(globeGeometry, globeMaterial)
-globe.material.side = THREE.DoubleSide
-scene.add(globe)
+
+setTimeout(() => {
+  const nextMesh = new THREE.Mesh(planeGeometry, planeMaterial)
+  nextMesh.name = 'next mesh'
+  nextMesh.position.set(-5, 0, -20)
+  scene.add(nextMesh)
+  setTimeout(() => {
+    removeEntity('next mesh')
+  }, 3000)
+}, 3000)
+
+function removeEntity (name) {
+  var selectedObject = scene.getObjectByName(name)
+  scene.remove(selectedObject)
+  renderLoop()
+}
+
+const sphereGeometry = new THREE.SphereGeometry(500, 60, 40)
+sphereGeometry.applyMatrix(new THREE.Matrix4().makeScale(-1, 1, 1))
+
+const sphereMaterial = new THREE.MeshBasicMaterial()
+sphereMaterial.map = THREE.ImageUtils.loadTexture('src/textures/equirectangle.jpg')
+// map: new THREE.TextureLoader().load('src/textures/equirectangle.jpg')
+
+const sphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial)
+sphereMesh.material.side = THREE.DoubleSide
+sphereMesh.name = 'sphereMesh'
+scene.add(sphereMesh)
 
 const renderer = new THREE.WebGLRenderer({ antialias: true })
 renderer.setSize(width, height)
 document.body.appendChild(renderer.domElement)
 
-const globeRaycaster = new THREE.Raycaster()
-const mouse = new THREE.Vector2()
-let isUserInteracting = false
-let lat = 0
-let lon = 0
-let phi = 0
-let theta = 0
+// listeners
+document.addEventListener('mousedown', onDocumentMouseDown, false)
+document.addEventListener('mousemove', onDocumentMouseMove, false)
+document.addEventListener('mouseup', onDocumentMouseUp, false)
 
-function render (dT) {
-  globeRaycaster.setFromCamera(mouse, camera)
+var manualControl = false
+var longitude = 0
+var latitude = 0
+var savedX
+var savedY
+var savedLongitude
+var savedLatitude
 
-  // const intersects = globeRaycaster.intersectObjects(scene.children)
-  // intersects.forEach((intersect) => {
-  //   console.log(intersect)
-  // })
+function onDocumentMouseDown (ev) {
+  ev.preventDefault()
+  manualControl = true
+  savedX = ev.clientX
+  savedY = ev.clientY
+  savedLongitude = longitude
+  savedLatitude = latitude
+}
 
-  requestAnimationFrame(render)
-  renderer.render(scene, camera)
+function onDocumentMouseMove (ev) {
+  if (manualControl) {
+    longitude = (savedX - ev.clientX) * 0.1 + savedLongitude
+    latitude = (ev.clientY - savedY) * 0.1 + savedLatitude
+  }
+}
 
-  // if (!isUserInteracting) {
-  //   lon += 0.05
-  // }
+function onDocumentMouseUp () {
+  manualControl = false
+}
 
-  lat = Math.max(-85, Math.min(85, lat))
-  phi = THREE.Math.degToRad(90 - lat)
-  theta = THREE.Math.degToRad(lon)
+function panUpdate (camera) {
+  if (!manualControl) {
+    // longitude += 0.1
+  }
 
-  camera.target.x = 500 * Math.sin(phi) * Math.cos(theta)
-  camera.target.y = 500 * Math.cos(phi)
-  camera.target.z = 500 * Math.sin(phi) * Math.sin(theta)
+  // limiting latitude from -85 to 85
+  latitude = Math.max(-85, Math.min(85, latitude))
+
+  const latRad = THREE.Math.degToRad(90 - latitude)
+  const longRad = THREE.Math.degToRad(longitude)
+  console.log(latRad, longRad)
+  const x = Math.sin(latRad) * Math.cos(longRad)
+  const y = Math.cos(latRad)
+  const z = Math.sin(latRad) * Math.sin(longRad)
+
+ // TODO figure out how to get it to start at a set position
+  camera.target.set(x, y, z)
   camera.lookAt(camera.target)
 }
 
-render()
+function renderLoop (dT) {
+  requestAnimationFrame(renderLoop)
+  cursor.update()
+  panUpdate(camera)
+  renderer.render(scene, camera)
+}
 
-let onPointerDownPointerX = 0
-let onPointerDownPointerY = 0
-let onPointerDownLon = 0
-let onPointerDownLat = 0
-
-window.addEventListener('mousedown', (ev) => {
-  ev.preventDefault()
-  isUserInteracting = true
-  onPointerDownPointerX = ev.clientX
-  onPointerDownPointerY = ev.clientY
-  onPointerDownLon = lon
-  onPointerDownLat = lat
-}, false)
-
-window.addEventListener('mouseup', (ev) => {
-  ev.preventDefault()
-  isUserInteracting = false
-}, false)
-
-window.addEventListener('mousemove', (ev) => {
-  if (!isUserInteracting) {
-    mouse.x = (ev.clientX / window.innerWidth) * 2 - 1
-    mouse.y = -(ev.clientY / window.innerHeight) * 2 + 1
-  } else {
-    lon = (onPointerDownPointerX - ev.clientX) * 0.1 + onPointerDownLon
-    lat = (ev.clientY - onPointerDownPointerY) * 0.1 + onPointerDownLat
-  }
-}, false)
+renderLoop()
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight
