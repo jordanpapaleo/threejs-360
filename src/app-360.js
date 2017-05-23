@@ -15,33 +15,19 @@ const ambientLight = new THREE.AmbientLight(0x444444)
 ambientLight.name = 'ambientLight'
 scene.add(ambientLight)
 
-const planeGeometry = new THREE.PlaneGeometry(3, 3)
-const planeMaterial = new THREE.MeshPhongMaterial({
-  color: 0xaaaaaa,
-  specular: 0xffffff,
-  shininess: 250,
-  side: THREE.DoubleSide,
-  vertexColors: THREE.VertexColors
-})
-
-const planes = [
-  new THREE.Mesh(planeGeometry, planeMaterial),
-  new THREE.Mesh(planeGeometry, planeMaterial),
-  new THREE.Mesh(planeGeometry, planeMaterial)
-]
-
 const cursor = new Cursor(camera)
 cursor.name = 'cursor'
 
-planes.forEach((plane, i) => {
-  plane.name = 'plane' + i
-  plane.position.set(i * 5, 0, -20)
+var planeCount = 3
+while (planeCount) {
+  const plane = createPlane()
+  plane.name = 'plane' + planeCount
+  plane.position.set(planeCount * 5, 0, -20)
   plane.lookAt(camera.position)
-
   plane.onFusing = function () {
     console.warn('fusing')
     if (this.material.emissive) {
-      this.material.emissive.setHex(0xff0000)
+      this.material.emissive.setHex(0xfff000)
     }
   }
 
@@ -53,16 +39,30 @@ planes.forEach((plane, i) => {
   plane.onFuseEnd = function () {
     console.warn('onfuseend')
     if (this.material.emissive) {
-      this.material.emissive.setHex(0xffff00)
+      this.material.emissive.setHex(0xff0000)
     }
   }
 
   cursor.addItem(plane)
   scene.add(plane)
-})
+  planeCount--
+}
+
+function createPlane () {
+  return new THREE.Mesh(
+    new THREE.PlaneGeometry(3, 3),
+    new THREE.MeshPhongMaterial({
+      color: 0xaaaaaa,
+      specular: 0xff0000,
+      shininess: 250,
+      side: THREE.DoubleSide,
+      vertexColors: THREE.VertexColors
+    })
+  )
+}
 
 setTimeout(() => {
-  const nextMesh = new THREE.Mesh(planeGeometry, planeMaterial)
+  const nextMesh = createPlane()
   nextMesh.name = 'next mesh'
   nextMesh.position.set(-5, 0, -20)
   scene.add(nextMesh)
@@ -109,10 +109,6 @@ var savedY
 var savedLongitude
 var savedLatitude
 var fov = camera.fov
-
-setTimeout(() => {
-  screenShot()
-}, 3000)
 
 function screenShot () {
   var w = window.open('', '')
